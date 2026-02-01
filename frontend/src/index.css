@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* If you need the custom colors from your old CSS, 
+   v4 lets you define them as variables like this: */
+@theme {
+  --color-nav-teal: #406661;
+  --color-nav-accent: #2aa904;
+}
