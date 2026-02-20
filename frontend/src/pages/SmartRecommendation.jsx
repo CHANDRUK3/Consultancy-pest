@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { 
   Brain, CheckCircle2, Sprout, MapPin, 
   CloudSun, Beaker, ShieldAlert, Search, 
-  Info, Zap, Leaf
+  Info, Zap, Leaf, AlertTriangle
 } from 'lucide-react';
+import { analyzePest } from '../data/pestanalyze';
 
 // --- DATA DEFINITIONS (Matched to your Training Script) ---
 const CROPS = ["Rice", "Wheat", "Cotton", "Tomato", "Chili", "Sugarcane", "Maize", "Potato"];
@@ -28,6 +29,7 @@ export default function SmartRecommendation() {
   const [season, setSeason] = useState("Kharif");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const toggleSymptom = (symptom) => {
     setSelectedSymptoms((prev) => 
@@ -35,46 +37,64 @@ export default function SmartRecommendation() {
     );
   };
 
-  // --- DYNAMIC PREDICTION ENGINE (Logic from your Python Script) ---
+  // --- ML-POWERED PREDICTION ENGINE ---
   const handleGetRecommendation = () => {
-    if (selectedSymptoms.length === 0) return;
+    if (selectedSymptoms.length === 0) {
+      setError('Please select at least one symptom to analyze.');
+      return;
+    }
+    
     setLoading(true);
+    setError(null);
+    setResult(null);
 
+    // Simulate API call delay for better UX
     setTimeout(() => {
-      const primarySymptom = selectedSymptoms[0];
-      let prediction = {};
-
-      // Logic branch based on Crop + Symptom (Mirroring your training data)
-      if (crop === "Rice" && primarySymptom === "Yellowing") {
-        prediction = { pest: "Leaf Miner", product: "SPRINT", dose: "500-1000 g/acre", sci: "Liriomyza spp." };
-      } else if (crop === "Cotton" && primarySymptom === "Holes") {
-        prediction = { pest: "Bollworm", product: "SPRINT", dose: "600-1000 ml/acre", sci: "Helicoverpa armigera" };
-      } else if (crop === "Tomato" && primarySymptom === "Spots") {
-        prediction = { pest: "Early Blight", product: "ALL CLEAR", dose: "300-400 ml/acre", sci: "Alternaria solani" };
-      } else if (crop === "Wheat" && primarySymptom === "Wilting") {
-        prediction = { pest: "Leaf Rust", product: "ALL CLEAR", dose: "280-400 ml/acre", sci: "Puccinia triticina" };
-      } else {
-        // Dynamic Fallback for other combinations
-        prediction = { 
-          pest: `${crop} ${primarySymptom} Pathogen`, 
-          product: "CROP GUARD", 
-          dose: "Contact Support",
-          sci: "General Pathogen" 
+      try {
+        // Prepare input data for ML analysis
+        const userInput = {
+          crop: crop,
+          growthStage: growthStage,
+          symptoms: selectedSymptoms,
+          location: location,
+          season: season
         };
+
+        // Call the ML analysis function
+        const prediction = analyzePest(userInput);
+        console.log('ML Analysis Input:', userInput);
+        console.log('ML Analysis Result:', prediction);
+
+        if (prediction.error) {
+          setError(prediction.error);
+          if (prediction.suggestions) {
+            setError(prev => prev + '\n\nSuggestions:\n' + prediction.suggestions.map(s => `• ${s}`).join('\n'));
+          }
+        } else {
+          // Set the ML prediction result
+          setResult({
+            pest: prediction.pest,
+            scientific: prediction.scientific,
+            recommendation: prediction.recommendation,
+            alternativeProduct: prediction.alternativeProduct,
+            dosage: prediction.dosage,
+            detailedDosage: prediction.detailedDosage,
+            applicationMethod: prediction.applicationMethod,
+            safetyInterval: prediction.safetyInterval,
+            confidence: prediction.confidence,
+            description: prediction.description,
+            matchDetails: prediction.matchDetails,
+            additionalInfo: prediction.additionalInfo
+          });
+        }
+      } catch (err) {
+        setError('Analysis failed. Please try again or contact support.');
+        console.error('Pest analysis error:', err);
+      } finally {
+        setLoading(false);
+        window.scrollTo({ top: 900, behavior: 'smooth' });
       }
-
-      setResult({
-        pest: prediction.pest,
-        scientific: prediction.sci,
-        recommendation: prediction.product,
-        dosage: prediction.dose,
-        confidence: Math.floor(Math.random() * (98 - 85 + 1) + 85), // Simulated ML confidence
-        description: `Our Random Forest model identified ${prediction.pest} based on ${primarySymptom} symptoms in ${location} during ${season}.`
-      });
-
-      setLoading(false);
-      window.scrollTo({ top: 900, behavior: 'smooth' });
-    }, 1000);
+    }, 1200); // Realistic ML processing time
   };
 
   return (
@@ -170,34 +190,74 @@ export default function SmartRecommendation() {
             </section>
 
             {/* AI DIAGNOSIS OUTPUT */}
-            {result ? (
+            {error ? (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-red-50 rounded-2xl p-8 border border-red-200 relative overflow-hidden">
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <AlertTriangle className="text-red-500" size={18} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Analysis Error</span>
+                    </div>
+                    <h3 className="text-2xl font-bold tracking-tight mb-4 text-red-800">Unable to Provide Recommendation</h3>
+                    <p className="text-red-700 text-lg leading-relaxed whitespace-pre-line">{error}</p>
+                  </div>
+                </div>
+              </div>
+            ) : result ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-[#022c22] rounded-2xl p-10 text-white shadow-2xl relative overflow-hidden">
                    <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-6">
                       <CheckCircle2 className="text-emerald-400" size={18} />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Model Confirmed: {result.confidence}%</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                        ML Analysis Complete: {result.confidence}% Confidence
+                      </span>
                     </div>
                     <h3 className="text-5xl font-black tracking-tight mb-2 uppercase">{result.pest}</h3>
                     <p className="text-emerald-400/80 font-bold italic text-base mb-8">{result.scientific}</p>
                     <p className="text-emerald-50/70 text-lg leading-relaxed max-w-3xl font-medium">{result.description}</p>
+                    
+                    {/* ML Analysis Details */}
+                    {result.matchDetails && (
+                      <div className="mt-6 flex flex-wrap gap-4 text-xs">
+                        <span className="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-300">
+                          Symptom Match: {result.matchDetails.symptomMatch}%
+                        </span>
+                        <span className="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-300">
+                          Location Factor: {result.matchDetails.locationFactor}x
+                        </span>
+                        <span className="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-300">
+                          Seasonal Factor: {result.matchDetails.seasonalFactor}x
+                        </span>
+                      </div>
+                    )}
                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="bg-emerald-50 h-10 w-10 rounded-xl flex items-center justify-center mb-6 text-emerald-600"><Beaker size={20} /></div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recommended Care</span>
-                    <p className="text-2xl font-bold text-slate-800 mt-1 mb-4 uppercase">{result.recommendation}</p>
-                    <div className="text-emerald-700 font-bold text-xs uppercase">Dosage: {result.dosage}</div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recommended Treatment</span>
+                    <p className="text-2xl font-bold text-slate-800 mt-1 mb-2 uppercase">{result.recommendation}</p>
+                    {result.alternativeProduct && (
+                      <p className="text-sm text-slate-600 mb-3">Alternative: {result.alternativeProduct}</p>
+                    )}
+                    <div className="text-emerald-700 font-bold text-xs uppercase mb-2">Dosage: {result.dosage}</div>
+                    {result.detailedDosage && (
+                      <div className="text-slate-600 text-xs">Application: {result.detailedDosage}</div>
+                    )}
+                    {result.applicationMethod && (
+                      <div className="text-slate-600 text-xs capitalize">Method: {result.applicationMethod}</div>
+                    )}
                   </div>
                   <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="bg-rose-50 h-10 w-10 rounded-xl flex items-center justify-center mb-6 text-rose-600"><ShieldAlert size={20} /></div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Safety Interval</span>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <p className="text-4xl font-black text-slate-800">14</p>
+                      <p className="text-4xl font-black text-slate-800">{result.safetyInterval || 14}</p>
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Days PHI</p>
                     </div>
+                    <p className="text-xs text-slate-500 mt-2">Pre-Harvest Interval</p>
                   </div>
                 </div>
               </div>
