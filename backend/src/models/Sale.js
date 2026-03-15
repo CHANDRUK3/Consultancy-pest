@@ -6,6 +6,20 @@ const SaleSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  customerLocation: {
+    type: String,
+    trim: true,
+    default: "Not Specified"
+  },
+  cropType: {
+    type: String,
+    trim: true,
+    default: "Not Specified"
+  },
+  landUnits: {
+    type: Number,
+    default: 0
+  },
   saleDate: {
     type: Date,
     default: Date.now

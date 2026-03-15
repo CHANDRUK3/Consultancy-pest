@@ -34,11 +34,14 @@ router.get('/expiry', async (req, res) => {
 
     const expired = await Inventory.find({
       expiryDate: { $lt: today },
-      isActive: true
+      isActive: true,
+      quantity: { $gt: 0 }
     }).populate('product');
 
     const expiring = await Inventory.find({
-      expiryDate: { $gte: today, $lte: ninetyDaysLater }
+      expiryDate: { $gte: today, $lte: ninetyDaysLater },
+      isActive: true,
+      quantity: { $gt: 0 }
     }).populate('product');
 
     res.json({ expired, expiring });

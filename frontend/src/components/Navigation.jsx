@@ -1,17 +1,25 @@
 // src/components/Navigation.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, X, LogOut, ShieldCheck, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function Navigation({ isAdminLoggedIn }) {
+  const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    if (window.triggerGoogleTranslate) {
+      window.triggerGoogleTranslate(lng);
+    }
+  };
+
   const handleAdminLogout = () => {
-    localStorage.removeItem("adminToken");   // ← important: clear the flag
+    localStorage.removeItem("adminToken");
     setMenuOpen(false);
-    navigate("/");                           // or "/admin/login" if you prefer
-    // Optional: window.location.reload();   // to fully reset state
+    navigate("/");
   };
 
   const closeMenus = () => setMenuOpen(false);
@@ -39,9 +47,26 @@ function Navigation({ isAdminLoggedIn }) {
         </Link>
 
         {/* MOBILE MENU TOGGLE */}
-        <button className="lg:hidden p-2 text-[#406661]" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        <div className="flex items-center gap-4 lg:hidden">
+          {/* Language Switcher Mobile */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => changeLanguage('en')}
+              className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-[#2aa904] text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => changeLanguage('ta')}
+              className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'ta' ? 'bg-[#2aa904] text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              தமிழ்
+            </button>
+          </div>
+          <button className="p-2 text-[#406661]" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
 
         {/* NAVIGATION LINKS */}
         <ul
@@ -58,7 +83,7 @@ function Navigation({ isAdminLoggedIn }) {
               <li className="w-full lg:w-auto border-t lg:border-t-0 border-slate-200 pt-4 lg:pt-0 mt-2 lg:mt-0 lg:ml-4">
                 <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50/70 rounded-lg text-emerald-700 font-semibold">
                   <ShieldCheck size={18} />
-                  Admin Mode
+                  {t('nav.admin_mode')}
                 </div>
               </li>
 
@@ -68,7 +93,6 @@ function Navigation({ isAdminLoggedIn }) {
                 </Link>
               </li>
 
-              {/* You can add quick links to main admin sections here */}
               <li>
                 <Link to="/admin/inventory" className={adminLinkClass} onClick={closeMenus}>
                   Inventory
@@ -87,23 +111,22 @@ function Navigation({ isAdminLoggedIn }) {
 
               <li className="mt-6 lg:mt-0 lg:ml-6">
                 <button className={adminLogoutClass} onClick={() => {
-            localStorage.removeItem("adminToken");
-            window.location.href = "/admin/login";
-          }}>
+                  localStorage.removeItem("adminToken");
+                  window.location.href = "/admin/login";
+                }}>
                   <LogOut size={16} />
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </li>
             </>
           ) : (
             // ── PUBLIC / NORMAL VISITOR ────────────────────────────────
             <>
-              <li><Link to="/" className={publicLinkClass} onClick={closeMenus}>Home</Link></li>
-              <li><Link to="/products" className={publicLinkClass} onClick={closeMenus}>Products</Link></li>
-              <li><Link to="/pesticides" className={publicLinkClass} onClick={closeMenus}>Pesticides</Link></li>
-              <li><Link to="/billing" className={publicLinkClass} onClick={closeMenus}>Billing</Link></li>
-              <li><Link to="/recommendation" className={publicLinkClass} onClick={closeMenus}>Recommendations</Link></li>
-              {/* <li><Link to="/about" className={publicLinkClass} onClick={closeMenus}>About</Link></li> */}
+              <li><Link to="/" className={publicLinkClass} onClick={closeMenus}>{t('nav.home')}</Link></li>
+              <li><Link to="/products" className={publicLinkClass} onClick={closeMenus}>{t('nav.products')}</Link></li>
+              <li><Link to="/pesticides" className={publicLinkClass} onClick={closeMenus}>{t('nav.pesticides')}</Link></li>
+              <li><Link to="/billing" className={publicLinkClass} onClick={closeMenus}>{t('nav.billing')}</Link></li>
+              <li><Link to="/recommendation" className={publicLinkClass} onClick={closeMenus}>{t('nav.recommendations')}</Link></li>
 
               <li className="mt-6 lg:mt-0 lg:ml-4">
                 <Link
@@ -111,11 +134,28 @@ function Navigation({ isAdminLoggedIn }) {
                   className="px-6 py-3 rounded-xl font-bold text-sm bg-[#2aa904] text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200/40"
                   onClick={closeMenus}
                 >
-                  Admin Login
+                  {t('nav.admin_login')}
                 </Link>
               </li>
             </>
           )}
+
+          {/* Language Switcher Desktop */}
+          <li className="hidden lg:flex items-center gap-1 ml-6 border-l pl-6 border-slate-200">
+            <Globe size={16} className="text-slate-400 mr-2" />
+            <button
+              onClick={() => changeLanguage('en')}
+              className={`text-[10px] font-bold px-2 py-1 rounded transition-all ${i18n.language === 'en' ? 'bg-[#2aa904] text-white' : 'hover:bg-slate-100 text-slate-500'}`}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => changeLanguage('ta')}
+              className={`text-[10px] font-bold px-2 py-1 rounded transition-all ${i18n.language === 'ta' ? 'bg-[#2aa904] text-white' : 'hover:bg-slate-100 text-slate-500'}`}
+            >
+              தமிழ்
+            </button>
+          </li>
         </ul>
       </div>
     </nav>

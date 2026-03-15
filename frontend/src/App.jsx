@@ -18,6 +18,7 @@ import ExpiryAlerts from "./admin/pages/Inventory/ExpiryAlerts";
 import AddPurchase from "./admin/pages/Inventory/AddPurchase";
 import SalesHistory from "./admin/pages/Sales/SalesHistory";
 import AddSale from "./admin/pages/Sales/AddSale";
+import SalesAnalysis from "./admin/pages/Sales/SalesAnalysis";
 import ProductsMaster from "./admin/pages/Masters/ProductsMaster";
 import Categories from "./admin/pages/Masters/Categories";
 import GovernmentReport from "./admin/pages/Reports/GovernmentReport";
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/admin/inventory/purchase" element={<AddPurchase />} />
                 <Route path="/admin/sales" element={<SalesHistory />} />
                 <Route path="/admin/sales/add" element={<AddSale />} />
+                <Route path="/admin/sales/analysis" element={<SalesAnalysis />} />
                 <Route path="/admin/masters/products" element={<ProductsMaster />} />
                 <Route path="/admin/masters/categories" element={<Categories />} />
                 <Route path="/admin/reports/government" element={<GovernmentReport />} />

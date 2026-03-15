@@ -3,6 +3,9 @@ import axios from "axios";
 
 export default function AddSale() {
   const [customer, setCustomer] = useState("");
+  const [customerLocation, setCustomerLocation] = useState("");
+  const [cropType, setCropType] = useState("");
+  const [landUnits, setLandUnits] = useState(0);
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split("T")[0]);
   const [products, setProducts] = useState([]);
   const [inventories, setInventories] = useState({});
@@ -104,7 +107,17 @@ export default function AddSale() {
     }
 
     try {
-      const saleData = { customer, saleDate, items, subtotal, gst, total };
+      const saleData = { 
+        customer, 
+        customerLocation, 
+        cropType, 
+        landUnits: Number(landUnits), 
+        saleDate, 
+        items, 
+        subtotal, 
+        gst, 
+        total 
+      };
       const res = await axios.post("http://localhost:5000/api/sales", saleData);
       
       setStatusMsg({ text: res.data.message || "Sale saved successfully!", type: "success" });
@@ -133,7 +146,7 @@ export default function AddSale() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name *</label>
             <input
@@ -142,6 +155,37 @@ export default function AddSale() {
               required
               value={customer}
               onChange={e => setCustomer(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Location</label>
+            <input
+              className="w-full border-gray-300 border p-3 rounded-lg focus:ring-teal-500 focus:border-teal-500 outline-none"
+              placeholder="Enter location"
+              value={customerLocation}
+              onChange={e => setCustomerLocation(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Crop Type</label>
+            <input
+              className="w-full border-gray-300 border p-3 rounded-lg focus:ring-teal-500 focus:border-teal-500 outline-none"
+              placeholder="e.g. Rice, Sugarcane"
+              value={cropType}
+              onChange={e => setCropType(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Land Units (Hectares)</label>
+            <input
+              type="number"
+              step="0.01"
+              className="w-full border-gray-300 border p-3 rounded-lg focus:ring-teal-500 focus:border-teal-500 outline-none"
+              value={landUnits}
+              onChange={e => setLandUnits(e.target.value)}
             />
           </div>
           <div>

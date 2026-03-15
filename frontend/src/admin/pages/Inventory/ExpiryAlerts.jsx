@@ -45,7 +45,7 @@ export default function ExpiryAlerts() {
           <section>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-amber-700">
-                Expiring Soon (Next 30–90 Days)
+                Upcoming Expiry (Next 90 Days)
               </h2>
               <span className="bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-sm font-medium">
                 {expiring.length} items

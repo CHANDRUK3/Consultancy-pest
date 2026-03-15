@@ -19,6 +19,7 @@ const menuGroups = [
     items: [
       { path: "/admin/sales", label: "Sales History" },
       { path: "/admin/sales/add", label: "New Sale" },
+      { path: "/admin/sales/analysis", label: "Sales Analysis" },
     ],
   },
   {
@@ -54,10 +55,9 @@ export default function AdminSidebar() {
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
-                      `block px-4 py-2.5 rounded-lg transition-colors ${
-                        isActive
-                          ? "bg-teal-700 text-white"
-                          : "text-teal-100 hover:bg-teal-700/70"
+                      `block px-4 py-2.5 rounded-lg transition-colors ${isActive
+                        ? "bg-teal-700 text-white"
+                        : "text-teal-100 hover:bg-teal-700/70"
                       }`
                     }
                   >

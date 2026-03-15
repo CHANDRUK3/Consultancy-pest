@@ -9,7 +9,18 @@ router.post('/', async (req, res) => {
   // REMOVED: session.startTransaction() - No longer needed for standalone MongoDB
 
   try {
-    const { customer, saleDate, items, subtotal, gst, total } = req.body;
+    console.log("📥 [backend-v2] New Sale Request Received:", req.body);
+    const { 
+      customer, 
+      customerLocation, 
+      cropType, 
+      landUnits, 
+      saleDate, 
+      items, 
+      subtotal, 
+      gst, 
+      total 
+    } = req.body;
 
     // Server-side validation
     if (!customer?.trim() || !items?.length) {
@@ -77,6 +88,9 @@ router.post('/', async (req, res) => {
     // 7. Save Sale (REMOVED: { session } inside save)
     const newSale = new Sale({
       customer: customer.trim(),
+      customerLocation: customerLocation?.trim(),
+      cropType: cropType?.trim(),
+      landUnits: Number(landUnits) || 0,
       saleDate: saleDate ? new Date(saleDate) : new Date(),
       items: processedItems,
       subtotal: serverSubtotal,
